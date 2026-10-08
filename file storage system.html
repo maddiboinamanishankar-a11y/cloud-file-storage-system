@@ -1,0 +1,975 @@
+```html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cloud File Storage System</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f1f5f9;
+            color: #1e293b;
+        }
+
+        /* HEADER */
+        header {
+            background: linear-gradient(135deg, #2563eb, #06b6d4);
+            color: white;
+            padding: 25px 45px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        header h1 {
+            font-size: 28px;
+        }
+
+        header p {
+            margin-top: 7px;
+            opacity: 0.9;
+        }
+
+        .cloud-status {
+            background: rgba(255,255,255,0.2);
+            padding: 12px 20px;
+            border-radius: 25px;
+        }
+
+        /* LAYOUT */
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 100px);
+        }
+
+        /* SIDEBAR */
+        .sidebar {
+            width: 230px;
+            background: #0f172a;
+            padding: 25px 15px;
+        }
+
+        .sidebar h3 {
+            color: white;
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .sidebar button {
+            width: 100%;
+            border: none;
+            background: transparent;
+            color: #cbd5e1;
+            padding: 14px;
+            margin-bottom: 8px;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 15px;
+        }
+
+        .sidebar button:hover,
+        .sidebar button.active {
+            background: #2563eb;
+            color: white;
+        }
+
+        /* MAIN */
+        .main {
+            flex: 1;
+            padding: 30px;
+        }
+
+        .section {
+            display: none;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        .title {
+            margin-bottom: 25px;
+        }
+
+        .title h2 {
+            font-size: 28px;
+        }
+
+        .title p {
+            color: #64748b;
+            margin-top: 6px;
+        }
+
+        /* CARDS */
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+            margin-bottom: 25px;
+        }
+
+        .card {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+        }
+
+        .card .icon {
+            font-size: 32px;
+            margin-bottom: 12px;
+        }
+
+        .card h3 {
+            color: #2563eb;
+            font-size: 28px;
+        }
+
+        .card p {
+            color: #64748b;
+            margin-top: 5px;
+        }
+
+        /* PANEL */
+        .panel {
+            background: white;
+            padding: 25px;
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.07);
+            margin-bottom: 25px;
+        }
+
+        .panel h3 {
+            margin-bottom: 18px;
+        }
+
+        /* UPLOAD */
+        .upload-box {
+            border: 2px dashed #60a5fa;
+            border-radius: 15px;
+            padding: 45px;
+            text-align: center;
+            background: #eff6ff;
+            cursor: pointer;
+        }
+
+        .upload-box:hover {
+            background: #dbeafe;
+        }
+
+        .upload-icon {
+            font-size: 50px;
+            margin-bottom: 10px;
+        }
+
+        .upload-box h3 {
+            margin-bottom: 8px;
+        }
+
+        .upload-box p {
+            color: #64748b;
+            margin-bottom: 15px;
+        }
+
+        .upload-button {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            padding: 12px 22px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        #fileInput {
+            display: none;
+        }
+
+        /* PROGRESS */
+        .progress-container {
+            margin-top: 20px;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 14px;
+            background: #e2e8f0;
+            border-radius: 20px;
+            overflow: hidden;
+        }
+
+        .progress {
+            height: 100%;
+            width: 35%;
+            background: #2563eb;
+            border-radius: 20px;
+        }
+
+        /* SEARCH */
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            flex: 1;
+            padding: 13px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+        }
+
+        /* TABLE */
+        .table-container {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #eff6ff;
+            color: #1d4ed8;
+            padding: 14px;
+            text-align: left;
+        }
+
+        td {
+            padding: 14px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .file-icon {
+            font-size: 22px;
+        }
+
+        .action-btn {
+            border: none;
+            padding: 8px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-right: 5px;
+        }
+
+        .download {
+            background: #dcfce7;
+            color: #166534;
+        }
+
+        .delete {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        /* EMPTY MESSAGE */
+        .empty {
+            text-align: center;
+            padding: 30px;
+            color: #64748b;
+        }
+
+        /* RESPONSIVE */
+        @media(max-width: 800px) {
+            .cards {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                width: 75px;
+            }
+
+            .sidebar h3 {
+                display: none;
+            }
+
+            .sidebar button {
+                font-size: 0;
+                text-align: center;
+            }
+
+            .main {
+                padding: 15px;
+            }
+
+            header {
+                padding: 20px;
+            }
+
+            .cloud-status {
+                display: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<!-- HEADER -->
+
+<header>
+
+    <div>
+        <h1>☁️ CloudBox</h1>
+        <p>Cloud File Storage System</p>
+    </div>
+
+    <div class="cloud-status">
+        🟢 Cloud Storage Online
+    </div>
+
+</header>
+
+
+<div class="layout">
+
+    <!-- SIDEBAR -->
+
+    <aside class="sidebar">
+
+        <h3>☁️ CLOUD</h3>
+
+        <button class="active"
+                onclick="showSection('dashboard', this)">
+            🏠 Dashboard
+        </button>
+
+        <button onclick="showSection('files', this)">
+            📁 My Files
+        </button>
+
+        <button onclick="showSection('upload', this)">
+            ⬆️ Upload File
+        </button>
+
+    </aside>
+
+
+    <!-- MAIN -->
+
+    <main class="main">
+
+
+        <!-- DASHBOARD -->
+
+        <section id="dashboard" class="section active">
+
+            <div class="title">
+
+                <h2>Cloud Dashboard</h2>
+
+                <p>
+                    Manage your files from one place.
+                </p>
+
+            </div>
+
+
+            <div class="cards">
+
+                <div class="card">
+
+                    <div class="icon">📁</div>
+
+                    <h3 id="fileCount">0</h3>
+
+                    <p>Total Files</p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="icon">💾</div>
+
+                    <h3 id="storageUsed">0 KB</h3>
+
+                    <p>Storage Used</p>
+
+                </div>
+
+
+                <div class="card">
+
+                    <div class="icon">☁️</div>
+
+                    <h3>10 GB</h3>
+
+                    <p>Total Storage</p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>Storage Usage</h3>
+
+                <div class="progress-container">
+
+                    <div class="progress-bar">
+
+                        <div id="progress"
+                             class="progress">
+                        </div>
+
+                    </div>
+
+                    <p id="storageText">
+                        0 KB of 10 GB used
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <div class="panel">
+
+                <h3>Quick Upload</h3>
+
+                <div class="upload-box"
+                     onclick="document.getElementById('fileInput').click()">
+
+                    <div class="upload-icon">
+                        ☁️
+                    </div>
+
+                    <h3>
+                        Upload files to Cloud
+                    </h3>
+
+                    <p>
+                        Click here to select files
+                    </p>
+
+                    <label class="upload-button">
+                        Select Files
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- FILES -->
+
+        <section id="files" class="section">
+
+            <div class="title">
+
+                <h2>My Files</h2>
+
+                <p>
+                    View and manage your uploaded files.
+                </p>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="search-box">
+
+                    <input
+                        type="text"
+                        id="search"
+                        placeholder="🔍 Search files..."
+                        onkeyup="searchFiles()">
+
+                </div>
+
+
+                <div class="table-container">
+
+                    <table>
+
+                        <thead>
+
+                            <tr>
+
+                                <th>File</th>
+                                <th>Size</th>
+                                <th>Type</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+
+                            </tr>
+
+                        </thead>
+
+                        <tbody id="fileTable">
+
+                        </tbody>
+
+                    </table>
+
+                    <div id="emptyMessage"
+                         class="empty">
+
+                        No files uploaded yet.
+
+                    </div>
+
+                </div>
+
+            </div>
+
+        </section>
+
+
+        <!-- UPLOAD -->
+
+        <section id="upload" class="section">
+
+            <div class="title">
+
+                <h2>Upload File</h2>
+
+                <p>
+                    Upload your files to cloud storage.
+                </p>
+
+            </div>
+
+
+            <div class="panel">
+
+                <div class="upload-box"
+                     onclick="document.getElementById('fileInput').click()">
+
+                    <div class="upload-icon">
+                        ☁️
+                    </div>
+
+                    <h3>
+                        Drag & Drop or Select Files
+                    </h3>
+
+                    <p>
+                        Upload documents, images, videos and other files.
+                    </p>
+
+                    <label class="upload-button">
+                        Choose Files
+                    </label>
+
+                </div>
+
+            </div>
+
+        </section>
+
+    </main>
+
+</div>
+
+
+<!-- HIDDEN FILE INPUT -->
+
+<input
+    type="file"
+    id="fileInput"
+    multiple>
+
+
+<script>
+
+    let files = [];
+
+
+    /* NAVIGATION */
+
+    function showSection(sectionId, button) {
+
+        document.querySelectorAll(".section")
+            .forEach(section => {
+                section.classList.remove("active");
+            });
+
+        document.getElementById(sectionId)
+            .classList.add("active");
+
+
+        document.querySelectorAll(".sidebar button")
+            .forEach(btn => {
+                btn.classList.remove("active");
+            });
+
+        button.classList.add("active");
+
+    }
+
+
+    /* FILE UPLOAD */
+
+    document.getElementById("fileInput")
+        .addEventListener("change", function() {
+
+            const selectedFiles =
+                Array.from(this.files);
+
+
+            selectedFiles.forEach(file => {
+
+                const fileData = {
+
+                    name: file.name,
+
+                    size: file.size,
+
+                    type: file.type || "Unknown",
+
+                    date: new Date()
+                        .toLocaleDateString(),
+
+                    originalFile: file
+
+                };
+
+
+                files.push(fileData);
+
+            });
+
+
+            updateFileList();
+
+            updateDashboard();
+
+
+            alert(
+                selectedFiles.length +
+                " file(s) uploaded successfully!"
+            );
+
+
+            this.value = "";
+
+        });
+
+
+    /* UPDATE FILE TABLE */
+
+    function updateFileList() {
+
+        const table =
+            document.getElementById("fileTable");
+
+        const empty =
+            document.getElementById("emptyMessage");
+
+
+        table.innerHTML = "";
+
+
+        if (files.length === 0) {
+
+            empty.style.display = "block";
+
+            return;
+
+        }
+
+
+        empty.style.display = "none";
+
+
+        files.forEach((file, index) => {
+
+            const row =
+                document.createElement("tr");
+
+
+            row.innerHTML = `
+
+                <td>
+                    <span class="file-icon">
+                        ${getFileIcon(file.name)}
+                    </span>
+                    ${file.name}
+                </td>
+
+                <td>
+                    ${formatSize(file.size)}
+                </td>
+
+                <td>
+                    ${file.type}
+                </td>
+
+                <td>
+                    ${file.date}
+                </td>
+
+                <td>
+
+                    <button
+                        class="action-btn download"
+                        onclick="downloadFile(${index})">
+                        ⬇ Download
+                    </button>
+
+                    <button
+                        class="action-btn delete"
+                        onclick="deleteFile(${index})">
+                        🗑 Delete
+                    </button>
+
+                </td>
+
+            `;
+
+
+            table.appendChild(row);
+
+        });
+
+    }
+
+
+    /* FILE ICON */
+
+    function getFileIcon(name) {
+
+        const extension =
+            name.split(".")
+                .pop()
+                .toLowerCase();
+
+
+        if (
+            extension === "jpg" ||
+            extension === "jpeg" ||
+            extension === "png" ||
+            extension === "gif"
+        ) {
+            return "🖼️";
+        }
+
+
+        if (
+            extension === "pdf"
+        ) {
+            return "📕";
+        }
+
+
+        if (
+            extension === "doc" ||
+            extension === "docx"
+        ) {
+            return "📘";
+        }
+
+
+        if (
+            extension === "xls" ||
+            extension === "xlsx"
+        ) {
+            return "📗";
+        }
+
+
+        if (
+            extension === "mp4" ||
+            extension === "avi"
+        ) {
+            return "🎬";
+        }
+
+
+        return "📄";
+
+    }
+
+
+    /* FORMAT SIZE */
+
+    function formatSize(bytes) {
+
+        if (bytes === 0) {
+            return "0 KB";
+        }
+
+
+        const units =
+            ["Bytes", "KB", "MB", "GB"];
+
+
+        const i =
+            Math.floor(
+                Math.log(bytes) /
+                Math.log(1024)
+            );
+
+
+        return (
+            (bytes /
+            Math.pow(1024, i))
+            .toFixed(2)
+            + " "
+            + units[i]
+        );
+
+    }
+
+
+    /* DASHBOARD */
+
+    function updateDashboard() {
+
+        document.getElementById("fileCount")
+            .innerText = files.length;
+
+
+        let total = 0;
+
+
+        files.forEach(file => {
+
+            total += file.size;
+
+        });
+
+
+        document.getElementById("storageUsed")
+            .innerText = formatSize(total);
+
+
+        const totalStorage =
+            10 * 1024 * 1024 * 1024;
+
+
+        const percentage =
+            (total /
+            totalStorage) * 100;
+
+
+        document.getElementById("progress")
+            .style.width =
+            Math.min(percentage, 100) + "%";
+
+
+        document.getElementById("storageText")
+            .innerText =
+            formatSize(total) +
+            " of 10 GB used";
+
+    }
+
+
+    /* SEARCH */
+
+    function searchFiles() {
+
+        const search =
+            document.getElementById("search")
+                .value
+                .toLowerCase();
+
+
+        const rows =
+            document.querySelectorAll(
+                "#fileTable tr"
+            );
+
+
+        rows.forEach(row => {
+
+            const text =
+                row.innerText.toLowerCase();
+
+
+            if (text.includes(search)) {
+
+                row.style.display = "";
+
+            } else {
+
+                row.style.display = "none";
+
+            }
+
+        });
+
+    }
+
+
+    /* DOWNLOAD */
+
+    function downloadFile(index) {
+
+        const file =
+            files[index].originalFile;
+
+
+        const url =
+            URL.createObjectURL(file);
+
+
+        const link =
+            document.createElement("a");
+
+
+        link.href = url;
+
+        link.download =
+            files[index].name;
+
+
+        link.click();
+
+
+        URL.revokeObjectURL(url);
+
+    }
+
+
+    /* DELETE */
+
+    function deleteFile(index) {
+
+        const confirmed =
+            confirm(
+                "Are you sure you want to delete this file?"
+            );
+
+
+        if (confirmed) {
+
+            files.splice(index, 1);
+
+            updateFileList();
+
+            updateDashboard();
+
+        }
+
+    }
+
+
+    /* INITIALIZE */
+
+    updateFileList();
+
+    updateDashboard();
+
+</script>
+
+</body>
+</html>
+```
